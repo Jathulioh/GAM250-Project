@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System;
+using System.Linq;
 
 public class DrunkardsMapGen : MonoBehaviour {
 
@@ -27,9 +28,12 @@ public class DrunkardsMapGen : MonoBehaviour {
 	int previousDirection = -1;
 	int nextTile = -1;
 
+	bool isGenerating = false;
+
+	[Header("Debugging")]
+	public bool useSpeed;
 	public float mapSpeed = 0.065f;
 
-	bool isGenerating = false;
 	void Start()
 	{
 		
@@ -43,14 +47,14 @@ public class DrunkardsMapGen : MonoBehaviour {
 			currentStep = 0;
 			mapLayout = new int[mapSize, mapSize];
 			if (!useSeed)
-				seed = DateTime.Now.Hour + DateTime.Now.Minute + DateTime.Now.Second + 2344;
+				seed = DateTime.Now.Hour + DateTime.Now.Minute + DateTime.Now.Second * 2344;
 
 			UnityEngine.Random.InitState(seed);
 
-		//	UnityEngine.Random.State oldState = UnityEngine.Random.state;
-			StartCoroutine(MapGenerator());
-		//	UnityEngine.Random.state = oldState;
-
+			if (!useSpeed)
+				mapGeneration();
+			else
+				StartCoroutine(MapGenerator());
 		}
 
 	}
@@ -86,30 +90,113 @@ public class DrunkardsMapGen : MonoBehaviour {
 		//MapSpawn();
 		isGenerating = false;
 		Debug.Log("Finished Generation");
+		SecondPass();
+	}
+
+	void mapGeneration()
+	{
+		if (GameObject.Find("LEVEL_DATA"))
+			Destroy(GameObject.Find("LEVEL_DATA"));
+
+		parent = new GameObject("LEVEL_DATA").transform;
+		isGenerating = true;
+		currentCoordRow = mapSize / 2;
+		currentCoordCol = mapSize / 2;
+		mapLayout[currentCoordRow, currentCoordCol] = 1;
+
+
+
+		while (currentStep < maxSteps)
+		{
+			if (Move(UnityEngine.Random.Range(0, 4)))
+			{
+				mapLayout[currentCoordRow, currentCoordCol] = 1;
+				GameObject go = Instantiate(mapTile[1], new Vector3(currentCoordCol, 0, currentCoordRow + 1), transform.rotation);
+				cursor.transform.position = new Vector3(go.transform.position.x, 3, go.transform.position.z);
+				if (go != null)
+					go.transform.SetParent(parent);
+
+				currentStep++;
+			}
+		}
+
+		//MapSpawn();
+		isGenerating = false;
+		Debug.Log("Finished Generation");
+		SecondPass();
 	}
 
 	void SecondPass()
 	{
 
 		//Find and place spawn
-		for (int i = 0; i < mapSize; i++)
+		for (int i = 0; i < mapSize-3; i++)
 		{
-			for (int j = 0; j < mapSize; j++)
+			for (int j = 0; j < mapSize-3; j++)
 			{
 
-				if (mapLayout[j, i] == 1 && mapLayout[j + 1,i] == 0 && mapLayout[j - 1, i] == 0 && mapLayout[j, i + 1] == 0)
+				int[,] testArray = new int[3, 3];
+
+				Debug.Log(testArray.Length + " | " + mapLayout.Length);
+
+				for (int k = 0; k < 3; k++)
 				{
-					int[,] test = new int[3, 4]
+					for (int l = 0; l < 3; l++)
 					{
-						{ 1, 1, 1, 1 },
-						{ 1, 3, 0, 0 },
-						{ 1, 1, 1, 1 },
-					};
+						
+							testArray[k, l] = mapLayout[i + k, j + l];
+							//Debug.Log("Test Array: " + k + ", " + l);
+							//Debug.Log("Map: " + i + ", " + j);
+
+					}
 				}
+
+				int[,] pattern1 = new int[3, 3]
+	{
+						{ 0, 0, 0},
+						{ 0, 1, 0},
+						{ 0, 1, 0},
+	};
+
+				for (int a = 0; a < 3; a++)
+				{
+					for (int b = 0; b < 3; b++)
+					{
+						if (compareArray(testArray, pattern1))
+						{
+							Debug.LogWarning("Pattern Found");
+						}
+						else
+						{
+							//Debug.LogWarning("No Pattern Occourance");
+						}
+					}
+				}
+				
+
+
+				
 
 			}
 		}
 
+	}
+
+	public bool compareArray(int[,] array1, int[,] array2)
+	{
+		if (array1.Length != array2.Length)
+			return false;
+
+		for (int i = 0; i < 3; i++)
+		{
+			for (int j = 0; j < 3; j++)
+			{
+				if (array1[i, j] != array2[i, j])
+					return false;
+			}
+		}
+
+		return true;
 	}
 
 	void MapSpawn()
@@ -168,7 +255,7 @@ public class DrunkardsMapGen : MonoBehaviour {
 				{
 					if (mapLayout[currentCoordRow - 2, currentCoordCol] == 1 && mapLayout[currentCoordRow - 1, currentCoordCol] == 0 || mapLayout[currentCoordRow - 1, currentCoordCol - 1] == 1 && mapLayout[currentCoordRow - 1, currentCoordCol + 1] == 1 && mapLayout[currentCoordRow - 1, currentCoordCol] == 0)
 					{																												 
-						Debug.Log("Blocked North");																					 
+						//Debug.Log("Blocked North");																					 
 						break;																										 
 					}																												 
 				}																													 
@@ -180,7 +267,7 @@ public class DrunkardsMapGen : MonoBehaviour {
 				{																													 
 					if (mapLayout[currentCoordRow, currentCoordCol + 2] == 1 && mapLayout[currentCoordRow, currentCoordCol + 1] == 0 || mapLayout[currentCoordRow - 1, currentCoordCol + 1] == 1 && mapLayout[currentCoordRow + 1, currentCoordCol + 1] == 1 && mapLayout[currentCoordRow, currentCoordCol + 1] == 0)
 					{
-						Debug.Log("Blocked East");
+						//Debug.Log("Blocked East");
 						break;
 					}
 				}catch{ }
@@ -191,7 +278,7 @@ public class DrunkardsMapGen : MonoBehaviour {
 				{
 					if (mapLayout[currentCoordRow + 2, currentCoordCol] == 1 && mapLayout[currentCoordRow + 1, currentCoordCol] == 0 || mapLayout[currentCoordRow + 1, currentCoordCol - 1] == 1 && mapLayout[currentCoordRow + 1, currentCoordCol + 1] == 1 && mapLayout[currentCoordRow + 1, currentCoordCol] == 0)
 					{
-						Debug.Log("Blocked South");
+						//Debug.Log("Blocked South");
 						break;
 					}
 				}
@@ -203,7 +290,7 @@ public class DrunkardsMapGen : MonoBehaviour {
 				{
 					if (mapLayout[currentCoordRow, currentCoordCol - 2] == 1 && mapLayout[currentCoordRow, currentCoordCol - 1] == 0 || mapLayout[currentCoordRow + 1, currentCoordCol - 1] == 1 && mapLayout[currentCoordRow - 1, currentCoordCol + 1] == 1 && mapLayout[currentCoordRow, currentCoordCol - 1] == 0)
 					{
-						Debug.Log("Blocked West");
+						//Debug.Log("Blocked West");
 						break;
 					}
 				}

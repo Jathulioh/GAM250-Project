@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.37311992, g: 0.38074034, b: 0.35872713, a: 1}
+  m_IndirectSpecularColor: {r: 0.37311953, g: 0.38074014, b: 0.3587274, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -144,9 +144,9 @@ MonoBehaviour:
   - {fileID: 1417812755597138, guid: 93b25619659f9214c95d3a45277f93d7, type: 2}
   - {fileID: 1276838497112190, guid: e5bd1dc13a421bb4a94fffbf1b3e728e, type: 2}
   - {fileID: 1297348344569176, guid: c7b93f68eb517984ba5764303de6fee4, type: 2}
-  mapSize: 500
+  mapSize: 250
   useSeed: 1
-  seed: 2413
+  seed: 51632
   maxSteps: 2000
   currentStep: 0
   stepCountdown: 50
@@ -154,6 +154,7 @@ MonoBehaviour:
   linearChanceDefault: 0
   linearChanceChange: 1
   cursor: {fileID: 1360419159}
+  useSpeed: 0
   mapSpeed: 0
 --- !u!4 &144102545
 Transform:
