@@ -39,7 +39,8 @@ public class DrunkardsMapGen : MonoBehaviour {
 		
 	}
 
-	// Update is called once per frame
+	//User Input
+	//Initiates Map Generation
 	void Update()
 	{
 		if (Input.GetKeyDown(KeyCode.S) && !isGenerating)
@@ -59,6 +60,7 @@ public class DrunkardsMapGen : MonoBehaviour {
 
 	}
 
+	//Generates the map in a coroutine (For debug and fun)
 	IEnumerator MapGenerator()
 	{
 		if (GameObject.Find("LEVEL_DATA"))
@@ -92,7 +94,7 @@ public class DrunkardsMapGen : MonoBehaviour {
 		Debug.Log("Finished Generation");
 		SecondPass();
 	}
-
+	//Generates the map
 	void mapGeneration()
 	{
 		if (GameObject.Find("LEVEL_DATA"))
@@ -129,7 +131,7 @@ public class DrunkardsMapGen : MonoBehaviour {
 	void SecondPass()
 	{
 
-		//Find and place spawn
+		//Loops through the map array and selects 3x3 sections to compare to a pattern
 		for (int i = 0; i < mapSize-3; i++)
 		{
 			for (int j = 0; j < mapSize-3; j++)
@@ -137,7 +139,7 @@ public class DrunkardsMapGen : MonoBehaviour {
 
 				int[,] testArray = new int[3, 3];
 
-				Debug.Log(testArray.Length + " | " + mapLayout.Length);
+				//Debug.Log(testArray.Length + " | " + mapLayout.Length);
 
 				for (int k = 0; k < 3; k++)
 				{
@@ -154,9 +156,9 @@ public class DrunkardsMapGen : MonoBehaviour {
 
 				int[,] pattern1 = new int[3, 3]
 				{
-					{ 0, 1, 0},
-					{ 0, 1, 0},
-					{ 0, 0, 0},
+					{ 1, 1, 1},
+					{ 1, 0, 0},
+					{ 1, 1, 1},
 				};
 
 				for (int a = 0; a < 3; a++)
