@@ -145,6 +145,7 @@ public class DrunkardsMapGen : MonoBehaviour {
 					{
 						
 							testArray[k, l] = mapLayout[i + k, j + l];
+						
 							//Debug.Log("Test Array: " + k + ", " + l);
 							//Debug.Log("Map: " + i + ", " + j);
 
@@ -152,11 +153,11 @@ public class DrunkardsMapGen : MonoBehaviour {
 				}
 
 				int[,] pattern1 = new int[3, 3]
-	{
-						{ 0, 0, 0},
-						{ 0, 1, 0},
-						{ 0, 1, 0},
-	};
+				{
+					{ 0, 1, 0},
+					{ 0, 1, 0},
+					{ 0, 0, 0},
+				};
 
 				for (int a = 0; a < 3; a++)
 				{
@@ -172,14 +173,8 @@ public class DrunkardsMapGen : MonoBehaviour {
 						}
 					}
 				}
-				
-
-
-				
-
 			}
 		}
-
 	}
 
 	public bool compareArray(int[,] array1, int[,] array2)
