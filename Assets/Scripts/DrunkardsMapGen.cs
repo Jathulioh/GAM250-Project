@@ -7,6 +7,7 @@ using System.Linq;
 public class DrunkardsMapGen : MonoBehaviour {
 
 	public GameObject[] mapTile;
+	public GameObject[] Objects;
 	public int mapSize;
 	int[,] mapLayout;
 	public bool useSeed = false;
@@ -22,6 +23,9 @@ public class DrunkardsMapGen : MonoBehaviour {
 	private float linearChance;
 	public float linearChanceDefault;
 	public float linearChanceChange;
+	int col;
+	int row;
+
 
 	public GameObject cursor;
 
@@ -48,7 +52,7 @@ public class DrunkardsMapGen : MonoBehaviour {
 			currentStep = 0;
 			mapLayout = new int[mapSize, mapSize];
 			if (!useSeed)
-				seed = DateTime.Now.Hour + DateTime.Now.Minute + DateTime.Now.Second * 2344;
+				seed = DateTime.Now.Hour + DateTime.Now.Minute + DateTime.Now.Second + DateTime.Now.Millisecond * 2344;
 
 			UnityEngine.Random.InitState(seed);
 
@@ -146,8 +150,11 @@ public class DrunkardsMapGen : MonoBehaviour {
 					for (int l = 0; l < 3; l++)
 					{
 						
-							testArray[k, l] = mapLayout[i + k, j + l];
+						testArray[k, l] = mapLayout[i + k, j + l];
+						col = i + k;
+						row = j + l;
 						
+
 							//Debug.Log("Test Array: " + k + ", " + l);
 							//Debug.Log("Map: " + i + ", " + j);
 
@@ -156,18 +163,20 @@ public class DrunkardsMapGen : MonoBehaviour {
 
 				int[,] pattern1 = new int[3, 3]
 				{
-					{ 1, 1, 1},
-					{ 1, 0, 0},
-					{ 1, 1, 1},
+					{ 0, 0, 0},
+					{ 0, 1, 0},
+					{ 0, 1, 0},
 				};
 
 				for (int a = 0; a < 3; a++)
 				{
 					for (int b = 0; b < 3; b++)
 					{
-						if (compareArray(testArray, pattern1))
+						if (compareArray(testArray, pattern1, col, row))
 						{
 							Debug.LogWarning("Pattern Found");
+							Debug.Log("Stuff and Things " + col + ", " + row);
+							replacePattern(col, row);
 						}
 						else
 						{
@@ -179,7 +188,23 @@ public class DrunkardsMapGen : MonoBehaviour {
 		}
 	}
 
-	public bool compareArray(int[,] array1, int[,] array2)
+	void replacePattern(int patternCol, int patternRow)
+	{
+		for (int i = patternCol; i < patternCol + 3; i++)
+		{ 
+			for (int j = patternRow; j < patternRow + 3; j++)
+			{
+				if (mapLayout[i, j] == 1)
+				{
+					Debug.Log("Other Stuff and Things " + i + ", " + j);
+					mapLayout[i, j] = 2;
+					Instantiate(Objects[0], new Vector3(j, 1, i), transform.rotation);
+				}
+			}
+		}
+	}
+
+	public bool compareArray(int[,] array1, int[,] array2, int patternCol, int patternRow)
 	{
 		if (array1.Length != array2.Length)
 			return false;
