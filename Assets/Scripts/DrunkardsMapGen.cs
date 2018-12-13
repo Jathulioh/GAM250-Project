@@ -168,11 +168,24 @@ public class DrunkardsMapGen : MonoBehaviour {
 					{ 0, 1, 0},
 				};
 
+				int[,] pattern2 = new int[3, 3]
+				{
+					{ 0, 0, 0},
+					{ 0, 1, 1},
+					{ 0, 0, 0},
+				};
+
 				for (int a = 0; a < 3; a++)
 				{
 					for (int b = 0; b < 3; b++)
 					{
 						if (compareArray(testArray, pattern1, col, row))
+						{
+							Debug.LogWarning("Pattern Found");
+							Debug.Log("Stuff and Things " + col + ", " + row);
+							replacePattern(col, row);
+						}
+						else if (compareArray(testArray, pattern1, col, row))
 						{
 							Debug.LogWarning("Pattern Found");
 							Debug.Log("Stuff and Things " + col + ", " + row);
@@ -190,15 +203,15 @@ public class DrunkardsMapGen : MonoBehaviour {
 
 	void replacePattern(int patternCol, int patternRow)
 	{
-		for (int i = patternCol; i < patternCol + 3; i++)
+		for (int i = patternCol; i > patternCol - 3; i--)
 		{ 
-			for (int j = patternRow; j < patternRow + 3; j++)
+			for (int j = patternRow; j > patternRow - 3; j--)
 			{
 				if (mapLayout[i, j] == 1)
 				{
 					Debug.Log("Other Stuff and Things " + i + ", " + j);
 					mapLayout[i, j] = 2;
-					Instantiate(Objects[0], new Vector3(j, 1, i), transform.rotation);
+					Instantiate(Objects[0], new Vector3(j, 1, i + 1), transform.rotation);
 				}
 			}
 		}
