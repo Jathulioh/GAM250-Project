@@ -4,13 +4,10 @@ using UnityEngine;
 
 public class SpawnPlayer : MonoBehaviour {
 
-	// Use this for initialization
-	void Start () {
-		
-	}
-	
-	// Update is called once per frame
-	void Update () {
-		
+	public GameObject player;
+
+	public void Spawn(Vector3 pos)
+	{
+		Instantiate(player, pos, transform.rotation);
 	}
 }

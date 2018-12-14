@@ -47,8 +47,9 @@ public class DrunkardsMapGen : MonoBehaviour {
 	//Initiates Map Generation
 	void Update()
 	{
-		if (Input.GetKeyDown(KeyCode.S) && !isGenerating)
+		if (Input.GetKeyDown(KeyCode.F) && !isGenerating)
 		{
+			MapCleanUp();
 			currentStep = 0;
 			mapLayout = new int[mapSize, mapSize];
 			if (!useSeed)
@@ -57,7 +58,7 @@ public class DrunkardsMapGen : MonoBehaviour {
 			UnityEngine.Random.InitState(seed);
 
 			if (!useSpeed)
-				mapGeneration();
+				MapGeneration();
 			else
 				StartCoroutine(MapGenerator());
 		}
@@ -67,6 +68,7 @@ public class DrunkardsMapGen : MonoBehaviour {
 	//Generates the map in a coroutine (For debug and fun)
 	IEnumerator MapGenerator()
 	{
+
 		if (GameObject.Find("LEVEL_DATA"))
 			Destroy(GameObject.Find("LEVEL_DATA"));
 
@@ -77,7 +79,7 @@ public class DrunkardsMapGen : MonoBehaviour {
 		mapLayout[currentCoordRow, currentCoordCol] = 1;
 
 		
-
+		//Does the map generation and spawns the floor tiles
 		while(currentStep < maxSteps)
 		{
 			yield return new WaitForSeconds(mapSpeed);
@@ -98,8 +100,9 @@ public class DrunkardsMapGen : MonoBehaviour {
 		Debug.Log("Finished Generation");
 		SecondPass();
 	}
+
 	//Generates the map
-	void mapGeneration()
+	void MapGeneration()
 	{
 		if (GameObject.Find("LEVEL_DATA"))
 			Destroy(GameObject.Find("LEVEL_DATA"));
@@ -132,6 +135,7 @@ public class DrunkardsMapGen : MonoBehaviour {
 		SecondPass();
 	}
 
+	//After the Map Generation has run, this will check the map for patterns and add collectibles
 	void SecondPass()
 	{
 
@@ -149,15 +153,11 @@ public class DrunkardsMapGen : MonoBehaviour {
 				{
 					for (int l = 0; l < 3; l++)
 					{
-						
 						testArray[k, l] = mapLayout[i + k, j + l];
 						col = i + k;
 						row = j + l;
-						
-
-							//Debug.Log("Test Array: " + k + ", " + l);
-							//Debug.Log("Map: " + i + ", " + j);
-
+						//Debug.Log("Test Array: " + k + ", " + l);
+						//Debug.Log("Map: " + i + ", " + j);
 					}
 				}
 
@@ -170,8 +170,8 @@ public class DrunkardsMapGen : MonoBehaviour {
 
 				int[,] pattern2 = new int[3, 3]
 				{
+					{ 0, 1, 0},
 					{ 0, 0, 0},
-					{ 0, 1, 1},
 					{ 0, 0, 0},
 				};
 
@@ -179,17 +179,17 @@ public class DrunkardsMapGen : MonoBehaviour {
 				{
 					for (int b = 0; b < 3; b++)
 					{
-						if (compareArray(testArray, pattern1, col, row))
+						if (CompareArray(testArray, pattern1, col, row))
 						{
 							Debug.LogWarning("Pattern Found");
-							Debug.Log("Stuff and Things " + col + ", " + row);
-							replacePattern(col, row);
+							
+							ReplacePattern(col, row);
 						}
-						else if (compareArray(testArray, pattern1, col, row))
+						else if (CompareArray(testArray, pattern2, col, row))
 						{
 							Debug.LogWarning("Pattern Found");
-							Debug.Log("Stuff and Things " + col + ", " + row);
-							replacePattern(col, row);
+							
+							ReplacePattern(col, row);
 						}
 						else
 						{
@@ -199,9 +199,13 @@ public class DrunkardsMapGen : MonoBehaviour {
 				}
 			}
 		}
+
+		gameObject.GetComponent<SpawnPlayer>().Spawn(cursor.transform.position);
+
 	}
 
-	void replacePattern(int patternCol, int patternRow)
+	//Finds the location of pattern that was found and puts collectibles there
+	void ReplacePattern(int patternCol, int patternRow)
 	{
 		for (int i = patternCol; i > patternCol - 3; i--)
 		{ 
@@ -209,7 +213,6 @@ public class DrunkardsMapGen : MonoBehaviour {
 			{
 				if (mapLayout[i, j] == 1)
 				{
-					Debug.Log("Other Stuff and Things " + i + ", " + j);
 					mapLayout[i, j] = 2;
 					Instantiate(Objects[0], new Vector3(j, 1, i + 1), transform.rotation);
 				}
@@ -217,7 +220,8 @@ public class DrunkardsMapGen : MonoBehaviour {
 		}
 	}
 
-	public bool compareArray(int[,] array1, int[,] array2, int patternCol, int patternRow)
+	//Checks if two arrays match
+	public bool CompareArray(int[,] array1, int[,] array2, int patternCol, int patternRow)
 	{
 		if (array1.Length != array2.Length)
 			return false;
@@ -234,6 +238,7 @@ public class DrunkardsMapGen : MonoBehaviour {
 		return true;
 	}
 
+	/* Old Map Spawning Code
 	void MapSpawn()
 	{
 		Vector3 spawnPosition = Vector3.zero;
@@ -263,10 +268,12 @@ public class DrunkardsMapGen : MonoBehaviour {
 			}
 		}
 	}
+	*/
 
+	//Handles the rules for map generation
 	bool Move(int Direction)
 	{
-
+		//Checks the chance of moving in the same direction and sets it
 			if (previousDirection >= 0)
 			{
 				if (Direction != previousDirection && UnityEngine.Random.value <= linearChance)
@@ -283,6 +290,7 @@ public class DrunkardsMapGen : MonoBehaviour {
 				previousDirection = Direction;
 			}
 
+			//Adds a rule which means if there is a floor tile after the next empty one, don't move towards it
 			switch (Direction)
 			{
 				case 0: // north
@@ -333,6 +341,7 @@ public class DrunkardsMapGen : MonoBehaviour {
 				currentCoordCol--;
 					break;
 		}
+			//Makes sure we don't try and go outside of the array
 			if (currentCoordRow < 0)
 			{
 				currentCoordRow = 0;
@@ -355,4 +364,18 @@ public class DrunkardsMapGen : MonoBehaviour {
 			}
 			return true;
 	}
+
+	void MapCleanUp()
+	{
+		GameObject[] objects;
+
+		objects = GameObject.FindGameObjectsWithTag("Collectable");
+
+		foreach (GameObject obj in objects)
+		{
+			Destroy(obj);
+		}
+
+	}
+
 }
